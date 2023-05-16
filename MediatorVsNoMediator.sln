@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App", "App\App.csproj", "{C1752E8C-1991-47E5-B264-A5F09F7F3A94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomServices", "CustomServices\CustomServices.csproj", "{FC9E0570-44DA-4B0E-92EF-BB17D9736966}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomNoMediatr", "CustomNoMediatr\CustomNoMediatr.csproj", "{FC9E0570-44DA-4B0E-92EF-BB17D9736966}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{F442A765-AEE4-4B9D-B737-1B4E1ECA9DEE}"
 EndProject
