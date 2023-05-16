@@ -5,7 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-foreach (var type in typeof(Program).Assembly.GetTypes().Where(x => x.Name.EndsWith("Handler") && !x.IsAbstract && !x.IsInterface))
+var types = typeof(Program)
+    .Assembly
+    .GetTypes()
+    .Where(x => (x.Name.EndsWith("Handler") || x.Name.EndsWith("Pipeline")) 
+                && !x.IsAbstract && !x.IsInterface);
+
+foreach (var type in types)
 {
     builder.Services.AddTransient(type);
 }
@@ -26,7 +32,20 @@ app.Use(async (ctx, next) =>
 {
     try
     {
-        await next();
+        var name = ctx.GetEndpoint();
+        if (name != null)
+        {
+
+            var _logger = ctx.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            _logger.LogInformation("Starting execution: '{name}'",name);
+            await next();
+            _logger.LogInformation("Finished executing '{name}'", name);
+        }
+        else
+        {
+            await next();
+        }
     }
     catch (ValidationException e)
     {
@@ -43,8 +62,9 @@ app.MapGet("/posts",
 app.MapPost("/post", 
     (CreatePostHandler handler, 
             CreatePost request, 
+            UserCommandPipeline pipe,
             CancellationToken ct) 
-        => handler.Handle(request, ct)
+        => pipe.Pipe(request, handler.Handle, ct)
     );
 
 await app.RunAsync();

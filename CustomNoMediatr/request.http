@@ -1,0 +1,11 @@
+﻿### Get all Posts request
+GET http://localhost:5001/posts/
+
+### Create a Post request
+POST http://localhost:5001/post/
+Content-Type: application/json
+
+{
+  "Title": "Hilo from the other wordoo",
+  "Body": "content"
+}

@@ -2,10 +2,10 @@
 
 namespace CustomNoMediatr.Posts;
 
-public record CreatePost(string Title, string Body)
+public record CreatePost(string Title, string Body) : IUserCommand
 {
     public string UserId { get; set; }
-    
+
     public class Validator : AbstractValidator<CreatePost>
     {
         public Validator()
