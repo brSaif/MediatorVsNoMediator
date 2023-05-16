@@ -1,18 +1,45 @@
+﻿using FluentValidation;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Services;
+using Services.Behaviours;
+using Services.Posts;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddMediatR( o =>
+{
+    o.RegisterServicesFromAssemblyContaining<Database>();
+    o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
+    o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AddUserIdBehaviour<,>));
+    o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+});
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePost>();
+
+builder.Services.AddDbContext<Database>( o =>
+{
+    o.UseSqlite($"Data Source=App.db");
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+Database.InitializeDb(app.Services);
+
+
+app.Use(async (ctx, next) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    try
+    {
+        await next();
+    }
+    catch (ValidationException e)
+    {
+       await ctx.Response.WriteAsJsonAsync(e.Errors);
+    }
+});
 
+app.MapGet("/posts", (IMediator mediatr) => mediatr.Send(new ListPosts()));
+app.MapPost("/post", (CreatePost request, IMediator mediatr) => mediatr.Send(request));
 
-app.Run();
+await app.RunAsync();
