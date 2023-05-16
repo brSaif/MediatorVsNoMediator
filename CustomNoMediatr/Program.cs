@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+foreach (var type in typeof(Program).Assembly.GetTypes().Where(x => x.Name.EndsWith("Handler") && !x.IsAbstract && !x.IsInterface))
+{
+    builder.Services.AddTransient(type);
+}
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -31,16 +35,16 @@ app.Use(async (ctx, next) =>
 });
 
 app.MapGet("/posts", 
-    (Database db, 
+    (ListPostsHandler handler, 
             CancellationToken ct) 
-        => new ListPostsHandler(db).Handle(new ListPosts(), ct)
+        => handler.Handle(new ListPosts(), ct)
     );
 
 app.MapPost("/post", 
-    (Database db, 
+    (CreatePostHandler handler, 
             CreatePost request, 
             CancellationToken ct) 
-        => new CreatePostHandler(db).Handle(request, ct)
+        => handler.Handle(request, ct)
     );
 
 await app.RunAsync();
