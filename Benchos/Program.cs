@@ -35,7 +35,7 @@ public class Benchmarks
     public Task Mediatr()
     {
         var mediatr = ServiceProvider.GetRequiredService<IMediator>();
-        return mediatr.Send(new CreatePost("Title", "body"));
+        return mediatr.Send(new Benchos.CreatePost("Title", "body"));
     }
 
     [Benchmark]
