@@ -1,8 +1,8 @@
-﻿using CustomNoMediatr;
+﻿using System.Reflection;
+using CustomNoMediatr;
 using CustomNoMediatr.Posts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Services.Posts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +12,37 @@ var types = typeof(Program)
     .Where(x => (x.Name.EndsWith("Handler") || x.Name.EndsWith("Pipeline")) 
                 && !x.IsAbstract && !x.IsInterface);
 
+var notificationsTypes = typeof(Program)
+    .Assembly
+    .GetTypes()
+    .Where(
+        x => x.GetInterfaces()
+                 .Any(i => i.IsGenericType 
+                           && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>))
+             && !x.IsAbstract && !x.IsInterface
+             );
+
+
 foreach (var type in types)
 {
     builder.Services.AddTransient(type);
 }
+
+
+// Register all notification handlers.
+foreach (var notificationsType in notificationsTypes)
+{
+    builder.Services.AddTransient(
+        notificationsType
+            .GetInterfaces()
+            .First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(INotificationHandler<>)),
+        notificationsType
+        );
+}
+
+// Register the custom built notifier service.
+builder.Services.AddTransient<Notifier>();
+
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -68,15 +95,33 @@ app.MapPost("/post",
         => pipe.Pipe(request, handler.Handle, ct)
     );
 
+
+// First Approach.
+// app.MapGet("/notification", 
+//     async (PingHandler pingHandler, 
+//         PongHandler pongHandler) 
+//         =>
+// {
+//     var id = Guid.NewGuid().ToString();
+//     await Task.WhenAll( 
+//         pingHandler.Handle(new Ping(){Message = id}, CancellationToken.None),
+//         pongHandler.Handle(new Pong(){Message = id}, CancellationToken.None)
+//         );
+//     
+//     return "ok";
+// });
+
+
+// Second Approach.
 app.MapGet("/notification", 
-    async (PingHandler pingHandler, 
-        PongHandler pongHandler) 
+    async (Notifier notifier) 
         =>
 {
     var id = Guid.NewGuid().ToString();
+    
     await Task.WhenAll( 
-        pingHandler.Handle(new Ping(){Message = id}, CancellationToken.None),
-        pongHandler.Handle(new Pong(){Message = id}, CancellationToken.None)
+        notifier.Handle(new Ping(){Message = id}, CancellationToken.None),
+        notifier.Handle(new Pong(){Message = id}, CancellationToken.None)
         );
     
     return "ok";

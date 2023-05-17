@@ -1,4 +1,6 @@
-namespace Services.Posts;
+using CustomNoMediatr.Posts;
+
+namespace CustomNoMediatr;
 
 public class PongHandler
 {
@@ -26,7 +28,7 @@ public class Pong
     public string Message { get; set; }
 }
 
-public sealed class PongEventOneHandler 
+public sealed class PongEventOneHandler : INotificationHandler<Pong>
 {
     private readonly ILogger<PongEventOneHandler> _logger;
 
@@ -41,7 +43,7 @@ public sealed class PongEventOneHandler
     }
 }
 
-public sealed class PongEventTwoHandler 
+public sealed class PongEventTwoHandler : INotificationHandler<Pong>
 {
     private readonly ILogger<PongEventTwoHandler> _logger;
 

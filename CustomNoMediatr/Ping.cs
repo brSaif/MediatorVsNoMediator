@@ -1,4 +1,6 @@
-namespace Services.Posts;
+using CustomNoMediatr.Posts;
+
+namespace CustomNoMediatr;
 
 public class PingHandler
 {
@@ -26,7 +28,7 @@ public class Ping
     public string Message { get; set; }
 }
 
-public sealed class PingEventOneHandler 
+public sealed class PingEventOneHandler : INotificationHandler<Ping>
 {
     private readonly ILogger<PingEventOneHandler> _logger;
 
@@ -42,7 +44,7 @@ public sealed class PingEventOneHandler
     }
 }
 
-public sealed class PingEventTwoHandler 
+public sealed class PingEventTwoHandler : INotificationHandler<Ping>
 {
     private readonly ILogger<PingEventTwoHandler> _logger;
 
