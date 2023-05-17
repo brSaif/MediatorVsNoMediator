@@ -2,6 +2,7 @@
 using CustomNoMediatr.Posts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Services.Posts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,5 +67,19 @@ app.MapPost("/post",
             CancellationToken ct) 
         => pipe.Pipe(request, handler.Handle, ct)
     );
+
+app.MapGet("/notification", 
+    async (PingHandler pingHandler, 
+        PongHandler pongHandler) 
+        =>
+{
+    var id = Guid.NewGuid().ToString();
+    await Task.WhenAll( 
+        pingHandler.Handle(new Ping(){Message = id}, CancellationToken.None),
+        pongHandler.Handle(new Pong(){Message = id}, CancellationToken.None)
+        );
+    
+    return "ok";
+});
 
 await app.RunAsync();
