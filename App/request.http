@@ -9,3 +9,6 @@ Content-Type: application/json
   "Title": "Hilo from the other wordoo",
   "Body": "content"
 }
+
+### Trigger MediatR notification handlers
+GET http://localhost:5000/notification

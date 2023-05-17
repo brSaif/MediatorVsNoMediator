@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore;
 using Services;
 using Services.Behaviours;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMediatR( o =>
 {
     o.RegisterServicesFromAssemblyContaining<Database>();
+    o.NotificationPublisher = new TaskWhenAllPublisher();
     o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AddUserIdBehaviour<,>));
     o.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -41,5 +43,16 @@ app.Use(async (ctx, next) =>
 
 app.MapGet("/posts", (IMediator mediatr) => mediatr.Send(new ListPosts()));
 app.MapPost("/post", (CreatePost request, IMediator mediatr) => mediatr.Send(request));
+app.MapGet("notification", async (IMediator mediator) =>
+{
+    var id = Guid.NewGuid().ToString();
+
+    await Task.WhenAll(
+        mediator.Publish(new Ping() {Message = id}),
+        mediator.Publish(new Pong() {Message = id})
+            );
+    return "ok";
+});
 
 await app.RunAsync();
+
