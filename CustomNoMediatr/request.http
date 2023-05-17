@@ -10,5 +10,8 @@ Content-Type: application/json
   "Body": "content"
 }
 
-### Trigger Custom no MediatR notification handlers
+### Trigger Custom no MediatR notification handlers : First Approach
+GET http://localhost:5001/v1/notification
+    
+### Trigger Custom no MediatR notification handlers : Second Approach
 GET http://localhost:5001/notification

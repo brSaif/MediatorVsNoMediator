@@ -97,19 +97,19 @@ app.MapPost("/post",
 
 
 // First Approach.
-// app.MapGet("/notification", 
-//     async (PingHandler pingHandler, 
-//         PongHandler pongHandler) 
-//         =>
-// {
-//     var id = Guid.NewGuid().ToString();
-//     await Task.WhenAll( 
-//         pingHandler.Handle(new Ping(){Message = id}, CancellationToken.None),
-//         pongHandler.Handle(new Pong(){Message = id}, CancellationToken.None)
-//         );
-//     
-//     return "ok";
-// });
+app.MapGet("/v1/notification", 
+    async (PingHandler pingHandler, 
+        PongHandler pongHandler) 
+        =>
+{
+    var id = Guid.NewGuid().ToString();
+    await Task.WhenAll( 
+        pingHandler.Handle(new Ping(){Message = id}, CancellationToken.None),
+        pongHandler.Handle(new Pong(){Message = id}, CancellationToken.None)
+        );
+    
+    return "ok";
+});
 
 
 // Second Approach.
